@@ -34,11 +34,11 @@
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">
                         <span class="fs-3">Name : </span> <span class="fs-5">
-                            {{ $selectedPost['posted_by'] }} </span>
+                            {{ $selectedPost->user ? $selectedPost->user->name : "UNKNOWN !!" }} </span>
                     </li>
                     <li class="list-group-item">
                         <span class="fs-3">Email : </span> <span class="fs-5">
-                            {{ $selectedPost['posted_by']."@gmail.com" }} </span>
+                            {{ $selectedPost->user ? $selectedPost->user->email : "UNKNOWN !!" }} </span>
                     </li>
                     <li class="list-group-item">
                         <span class="fs-3">Created At : </span> <span class="fs-5">

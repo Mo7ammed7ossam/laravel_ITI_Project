@@ -20,20 +20,19 @@ use App\Http\Controllers\PostController;
 
 // posts routes
 Route::GET('/', [PostController::class, 'index'])->name('posts.index');
-
 Route::GET('/posts', [PostController::class, 'index'])->name('posts.index');
 
-Route::GET('/posts/create', [PostController::class, 'create'])->name('posts.create');
 
+Route::GET('/posts/create', [PostController::class, 'create'])->name('posts.create');
 Route::POST('/posts', [PostController::class, 'store'])->name('posts.store');
 
-//
+
 Route::GET('/posts/{post}', [PostController::class, 'show'])->name('posts.show');
 
 
 Route::GET('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
-
 Route::PUT('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
+
 
 Route::DELETE('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
 

@@ -3,30 +3,34 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\User;
+use App\Models\Post;
 
 class PostController extends Controller
 {
 
-    public $posts = [
-        ['id' => 1, 'title' => 'first post', 'description' => 'aya 7age', 'posted_by' => 'mohamed Alwakiel', 'created_at' => '10/10/2020'],
-
-        ['id' => 2, 'title' => 'second post', 'description' => 'aya 7age', 'posted_by' => 'sayeed ali', 'created_at' => '10/10/2020'],
-
-        ['id' => 3, 'title' => 'third post', 'description' => 'aya 7age', 'posted_by' => 'mohamed khaled', 'created_at' => '10/10/2020']
-    ];
-
-
-
     public function index()
     {
+        // can use this line to fetch user and create pagination with 4 posts
+        // $posts = DB::table('posts')->paginate(4);    // simple way
+
+        // using Paginating Eloquent
+        $posts = Post::paginate(8);
+
+        // $posts = Post::all();   // or can use get()
+
         return view('posts.index', [
-            'posts' =>  $this->posts
+            'posts' =>  $posts
         ]);
     }
 
     public function create()
     {
-        return view('posts.create');
+        $users = User::all();   // fetch users from user table
+
+        return view('posts.create', [
+            'users' => $users
+        ]);
     }
 
     public function store()
@@ -34,51 +38,40 @@ class PostController extends Controller
         //fetch request data
         $requestData = request()->all();
 
-        // create new ID
-        $newID = sizeof($this->posts) + 1;
 
-        //store request data in db
-        $newPost =  ['id' => $newID, 'title' => $requestData['title'], 'description' => $requestData['description'], 'posted_by' => $requestData['Post_Creator'], 'created_at' => '10/10/2020'];
-
-        // store new post on array
-        array_push($this->posts, $newPost);
+        // store new data into data base
+        Post::create([
+            'title' => $requestData['title'],
+            'description' => $requestData['description'],
+            'user_id' => $requestData['user_id']
+        ]);
 
         //redirection to posts.index
-        return view('posts.index', [
-            'posts' =>  $this->posts
-        ]);
+        return redirect()->route('posts.index');
+
     }
 
     public function show($postID)
     {
 
-        foreach ($this->posts as $post) :
-
-            if ($post['id'] == $postID) :
-                $selectedPost =  ['id' => $postID, 'title' => $post['title'], 'description' => $post['description'], 'posted_by' => $post['posted_by'], 'created_at' => $post['created_at']];
-            endif;
-
-        endforeach;
+        $post = Post::find($postID);
+        // or post::where('id', $postID)->first();
 
         return view('posts.show', [
-            'selectedPost' => $selectedPost
+            'selectedPost' => $post
         ]);
     }
 
+
     public function edit($postID)
     {
+        $users = User::all();   // fetch users from user table
 
-        foreach ($this->posts as $post) :
-
-            if ($post['id'] == $postID) :
-                $selectedPost =  ['id' => $postID, 'title' => $post['title'], 'description' => $post['description'], 'posted_by' => $post['posted_by'], 'created_at' => $post['created_at']];
-            endif;
-
-        endforeach;
-
+        $post = Post::find($postID);
 
         return view('posts.edit', [
-            'selectedPost' => $selectedPost
+            'selectedPost' => $post,
+            'users' => $users
         ]);
     }
 
@@ -87,37 +80,24 @@ class PostController extends Controller
         //fetch request data
         $requestData = request()->all();
 
-        foreach ($this->posts as $i=>$post):
-
-            if ($post['id'] == $postID) :
-                $this->posts[$i]['title'] = $requestData['title'];
-                $this->posts[$i]['description'] = $requestData['description'];
-                $this->posts[$i]['posted_by'] = $requestData['Post_Creator'];
-            endif;
-
-        endforeach;
+        // update new data into data base
+        Post::find($postID)->update([
+            'title' => $requestData['title'],
+            'description' => $requestData['description'],
+            'user_id' => $requestData['user_id']
+        ]);
 
         //redirection to posts.index
-        return view('posts.index', [
-            'posts' =>  $this->posts
-        ]);
+        return redirect()->route('posts.index');
     }
 
     public function destroy($postID)
     {
-
-        foreach ($this->posts as $i=>$post):
-
-            if ($post['id'] == $postID) :
-                unset($this->posts[$i]);
-            endif;
-
-        endforeach;
+        Post::find($postID)->delete();
 
         //redirection to posts.index
-        return view('posts.index', [
-            'posts' =>  $this->posts
-        ]);
+        return redirect()->route('posts.index');
+
     }
 
 }
