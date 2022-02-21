@@ -1,4 +1,4 @@
-@extends('layout.app')
+@extends('layouts.app')
 
 @section('title')
     Create Post
@@ -23,7 +23,7 @@
 
             <select name="user_id" class="form-control">
 
-                <option class="text-center"> -- select creator -- </option>
+                <option class="text-center" value=""> -- select creator -- </option>
 
                 {{-- loop on users to show them in drop down list --}}
                 @foreach ($users as $user)

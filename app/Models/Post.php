@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Cviebrock\EloquentSluggable\Sluggable;
+
 
 class Post extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes, Sluggable;
 
     protected $fillable = [
         'title',
@@ -20,9 +23,17 @@ class Post extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function changedName()
+    /**
+     * Return the sluggable configuration array for this model.
+     *
+     * @return array
+     */
+    public function sluggable(): array
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return [
+            'slug_title' => [
+                'source' => 'title'
+            ]
+        ];
     }
-
 }

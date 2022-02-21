@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PostRequest;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Post;
@@ -11,14 +12,11 @@ class PostController extends Controller
 
     public function index()
     {
-        // can use this line to fetch user and create pagination with 4 posts
-        // $posts = DB::table('posts')->paginate(4);    // simple way
 
         // using Paginating Eloquent
         $posts = Post::paginate(8);
 
         // $posts = Post::all();   // or can use get()
-
         return view('posts.index', [
             'posts' =>  $posts
         ]);
@@ -33,11 +31,10 @@ class PostController extends Controller
         ]);
     }
 
-    public function store()
+    public function store(PostRequest $postRequest)
     {
         //fetch request data
         $requestData = request()->all();
-
 
         // store new data into data base
         Post::create([
@@ -62,7 +59,6 @@ class PostController extends Controller
         ]);
     }
 
-
     public function edit($postID)
     {
         $users = User::all();   // fetch users from user table
@@ -75,8 +71,10 @@ class PostController extends Controller
         ]);
     }
 
-    public function update($postID)
+    public function update(PostRequest $postRequest, $postID)
     {
+        // validation 
+       
         //fetch request data
         $requestData = request()->all();
 
@@ -93,11 +91,42 @@ class PostController extends Controller
 
     public function destroy($postID)
     {
-        Post::find($postID)->delete();
+        $requestData = request()->all();
+
+        if($requestData['delete'] == "delete"):
+
+            Post::find($postID)->delete();
+            return redirect()->route('posts.index');
+
+        elseif($requestData['delete'] == "deleteforEver"):
+
+            Post::withTrashed()->find($postID)->forceDelete();
+            return redirect()->route('posts.archive');
+
+        endif;
 
         //redirection to posts.index
         return redirect()->route('posts.index');
 
     }
+
+    public function archive()
+    {
+
+        // using Paginating Eloquent
+        $posts = Post::onlyTrashed()->get();
+
+        // $posts = Post::all();   // or can use get()
+        return view('posts.archive', [
+            'posts' =>  $posts
+        ]);
+    }
+
+    public function restore($postID)
+    {
+        Post::withTrashed()->find($postID)->restore();
+        return redirect()->route('posts.archive');
+    }
+
 
 }

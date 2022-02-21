@@ -1,4 +1,4 @@
-@extends('layout.app')
+@extends('layouts.app')
 
 @section('title')
     Update Post
@@ -8,6 +8,9 @@
     <form class="mt-5 w-50 mx-auto" action="{{ route('posts.update', $selectedPost['id']) }}" method="post">
         @csrf
         @method('put')
+
+        <input type="hidden" name="id" value="{{ $selectedPost['id'] }}">
+
         <div class="mb-3">
             <label for="exampleInputEmail1" class="form-label">Title</label>
             <input type="text" value="{{ $selectedPost['title'] }}" name="title" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
@@ -25,7 +28,7 @@
 
             <select name="user_id" class="form-control">
 
-                <option class="text-center" {{ $selectedPost->user ? "" : "SELECTED" }}> -- select creator -- </option>
+                <option class="text-center" value="" {{ $selectedPost->user ? "" : "SELECTED" }}> -- select creator -- </option>
 
                 {{-- loop on users to show them in drop down list --}}
                 @foreach ($users as $user)
