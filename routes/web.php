@@ -2,7 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
+use App\Models\User;
 use Illuminate\Routing\RouteGroup;
+use Illuminate\Support\Facades\Auth;
+use Laravel\Socialite\Facades\Socialite;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -19,11 +23,12 @@ use Illuminate\Routing\RouteGroup;
 // });
 
 
-// posts routes
-Route::GET('/', [PostController::class, 'index'])->name('posts.index');
-Route::GET('/posts', [PostController::class, 'index'])->name('posts.index');
+// Web
 
 Route::middleware(['auth'])->group(function () {
+    Route::GET('/', [PostController::class, 'index'])->name('posts.index');
+    Route::GET('/posts', [PostController::class, 'index'])->name('posts.index');
+
     Route::GET('/posts/archive', [PostController::class, 'archive'])->name('posts.archive');
     Route::POST('/posts/{post}', [PostController::class, 'restore'])->name('posts.restore');
 
@@ -39,13 +44,74 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
-
-
-
-
-
-
-
+// API
 Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+
+
+// for github
+
+Route::get('/auth/github', function () {
+    return Socialite::driver('github')->redirect();
+})->name('github.login');
+
+Route::get('/auth/github/callback', function () {
+    $githubUser = Socialite::driver('github')->stateless()->user();
+
+    $user = User::where('github_id', $githubUser->id)->first();
+
+    if ($user) {
+        $user->update([
+            'github_token' => $githubUser->token,
+            'github_refresh_token' => $githubUser->refreshToken,
+        ]);
+    } else {
+        $user = User::create([
+            'name' => $githubUser->name,
+            'email' => $githubUser->email,
+            'github_id' => $githubUser->id,
+            'github_token' => $githubUser->token,
+            'github_refresh_token' => $githubUser->refreshToken,
+        ]);
+    }
+
+    Auth::login($user);
+    return redirect('/');
+});
+
+
+
+
+// for google
+
+Route::get('/auth/google', function () {
+    return Socialite::driver('google')->redirect();
+})->name('google.login');
+
+Route::get('/auth/google/callback', function () {
+
+    try {
+        $user = Socialite::driver('google')->user();
+
+        $finduser = User::where('google_id', $user->id)->first();
+
+        if ($finduser) {
+            Auth::login($finduser);
+            return redirect('/');
+        } else {
+            $newUser = User::create([
+                'name' => $user->name,
+                'email' => $user->email,
+                'google_id' => $user->id,
+                'password' => encrypt('123456dummy')
+            ]);
+
+            Auth::login($newUser);
+            return redirect('/');
+            // return redirect()->intended('dashboard');
+        }
+    } catch (Exception $e) {
+        dd($e->getMessage());
+    }
+});

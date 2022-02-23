@@ -13,7 +13,7 @@
             </a>
         </div>
 
-        <div class="fs-5 w-75 mx-auto d-flex justify-content-end">
+        <div class="fs-5 mx-auto d-flex justify-content-end">
             <a href="{{ route('posts.archive') }}" class=""> Archive Posts </a>
         </div>
 

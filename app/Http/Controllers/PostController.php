@@ -14,8 +14,9 @@ class PostController extends Controller
     {
 
         // using Paginating Eloquent
-        $posts = Post::paginate(8);
-
+        // $posts = Post::paginate(8);
+        $posts = Post::with('user')->paginate(8);
+        
         // $posts = Post::all();   // or can use get()
         return view('posts.index', [
             'posts' =>  $posts
@@ -73,8 +74,8 @@ class PostController extends Controller
 
     public function update(PostRequest $postRequest, $postID)
     {
-        // validation 
-       
+        // validation
+
         //fetch request data
         $requestData = request()->all();
 
